@@ -23,6 +23,18 @@ textarea{min-height:100px;resize:vertical}
 button{border:0;background:#087f8c;color:white;font-weight:bold;cursor:pointer}
 button:disabled{opacity:.6}
 .property{border:1px solid #dbe3ed;padding:15px;margin-top:15px;border-radius:9px;overflow-wrap:anywhere}
+  .agency-card{
+  border:1px solid #dbe3ed;
+  padding:15px;
+  margin-top:15px;
+  border-radius:9px;
+  overflow-wrap:anywhere;
+  background:#fff;
+}
+.agency-card h3{
+  color:#087f8c;
+  margin-top:0;
+}
 .price{color:#087f8c;font-size:20px;font-weight:bold}
 .message{white-space:pre-line;overflow-wrap:anywhere}
 .small{color:#526174;font-size:14px}
@@ -76,6 +88,37 @@ footer{text-align:center;padding:20px;color:#526174}
 </form>
 <p id="searchMessage" class="message" role="status">Search to find published properties.</p>
 <div id="results"></div>
+</section>
+
+<section class="card" id="agencyDirectory">
+  <h2>Agency Directory</h2>
+  <p>Browse approved estate agencies across South Africa.</p>
+
+  <form id="agencySearchForm">
+    <input id="agencySearchText"
+           placeholder="Search agency name or province">
+
+    <select id="agencySearchProvince">
+      <option value="">All provinces</option>
+      <option>Eastern Cape</option>
+      <option>Free State</option>
+      <option>Gauteng</option>
+      <option>KwaZulu-Natal</option>
+      <option>Limpopo</option>
+      <option>Mpumalanga</option>
+      <option>Northern Cape</option>
+      <option>North West</option>
+      <option>Western Cape</option>
+    </select>
+
+    <button type="submit">Search Agencies</button>
+  </form>
+
+  <p id="agencyDirectoryMessage" class="message" role="status">
+    Loading approved agencies...
+  </p>
+
+  <div id="agencyDirectoryResults"></div>
 </section>
 
 <section class="card" id="list">
@@ -517,6 +560,112 @@ document.getElementById("enquiryForm").addEventListener("submit", async function
     setBusy(form, false);
   }
 });
+ 
+/* AGENCY DIRECTORY */
+let approvedAgencies = [];
+
+async function loadAgencies() {
+  const message = document.getElementById("agencyDirectoryMessage");
+  const results = document.getElementById("agencyDirectoryResults");
+
+  if (!message || !results) return;
+
+  message.textContent = "Loading approved agencies...";
+
+  try {
+    const { data, error } = await db
+      .from("agencies")
+      .select("agency_name, contact_person, email, phone, province")
+      .eq("status", "Published")
+      .order("agency_name", { ascending: true });
+
+    if (error) throw error;
+
+    approvedAgencies = data || [];
+    showAgencies();
+  } catch (error) {
+    console.error(error);
+    message.textContent =
+      "Could not load agencies. Please check the database connection.";
+  }
+}
+
+function showAgencies() {
+  const results = document.getElementById("agencyDirectoryResults");
+  const message = document.getElementById("agencyDirectoryMessage");
+  const search = document.getElementById("agencySearchText");
+  const province = document.getElementById("agencySearchProvince");
+
+  if (!results || !message || !search || !province) return;
+
+  results.replaceChildren();
+
+  const term = search.value.trim().toLowerCase();
+
+  const matches = approvedAgencies.filter(a =>
+    (!term ||
+      (a.agency_name || "").toLowerCase().includes(term) ||
+      (a.province || "").toLowerCase().includes(term)) &&
+    (!province.value || a.province === province.value)
+  );
+
+  if (!matches.length) {
+    message.textContent = approvedAgencies.length
+      ? "No agencies match your search."
+      : "No approved agencies are listed yet.";
+    return;
+  }
+
+  message.textContent = matches.length + " approved agencies found.";
+
+  matches.forEach(a => {
+    const card = document.createElement("article");
+    card.className = "agency-card";
+
+    const title = document.createElement("h3");
+    title.textContent = a.agency_name || "Estate agency";
+    card.appendChild(title);
+
+    if (a.province) {
+      const p = document.createElement("p");
+      p.textContent = "Province: " + a.province;
+      card.appendChild(p);
+    }
+
+    if (a.contact_person) {
+      const p = document.createElement("p");
+      p.textContent = "Contact: " + a.contact_person;
+      card.appendChild(p);
+    }
+
+    if (a.phone) {
+      const p = document.createElement("p");
+      p.textContent = "Phone: " + a.phone;
+      card.appendChild(p);
+    }
+
+    if (a.email) {
+      const p = document.createElement("p");
+      p.textContent = "Email: " + a.email;
+      card.appendChild(p);
+    }
+
+    results.appendChild(card);
+  });
+}
+
+const agencySearchForm =
+  document.getElementById("agencySearchForm");
+
+if (agencySearchForm) {
+  agencySearchForm.addEventListener("submit", event => {
+    event.preventDefault();
+    showAgencies();
+  });
+}
+
+loadAgencies();
+ 
 </script>
 </body>
 </html>
