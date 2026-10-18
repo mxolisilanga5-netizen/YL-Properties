@@ -1,0 +1,134 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SA Property Connect</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: #f3f5f7;
+      color: #172554;
+    }
+    header {
+      background: #12315b;
+      color: white;
+      padding: 28px 16px;
+      text-align: center;
+    }
+    header h1 { margin: 0 0 10px; }
+    main { max-width: 750px; margin: 20px auto; padding: 15px; }
+    .card {
+      background: white;
+      padding: 20px;
+      margin-bottom: 18px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px #0001;
+    }
+    input, select, textarea, button {
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0;
+      box-sizing: border-box;
+      border-radius: 6px;
+      font-size: 16px;
+    }
+    input, select, textarea { border: 1px solid #ccd3dd; }
+    button {
+      background: #087f8c;
+      color: white;
+      border: 0;
+      font-weight: bold;
+    }
+    .note { color: #526174; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>SA Property Connect</h1>
+    <p>Connecting South Africa to property opportunities</p>
+  </header>
+  <main>
+    <section class="card">
+      <h2>Find a Property</h2>
+      <p>Search for houses, flats, rooms and commercial properties.</p>
+      <input id="area" placeholder="Enter town or suburb">
+      <select id="type">
+        <option value="">All property types</option>
+        <option>House</option>
+        <option>Flat or Apartment</option>
+        <option>Room to Rent</option>
+        <option>Commercial</option>
+        <option>Land</option>
+      </select>
+      <select id="purpose">
+        <option>For Sale</option>
+        <option>For Rent</option>
+      </select>
+      <button onclick="searchProperties()">Search Properties</button>
+      <p id="result"></p>
+    </section>
+
+    <section class="card">
+      <h2>Register Your Agency</h2>
+      <p class="note">For estate agencies and property practitioners.</p>
+      <form onsubmit="registerAgency(event)">
+        <input id="agency" placeholder="Agency name" required>
+        <input id="contact" placeholder="Contact person" required>
+        <input id="email" type="email" placeholder="Email address" required>
+        <input id="phone" type="tel" placeholder="Phone number" required>
+        <button type="submit">Submit Agency Details</button>
+      </form>
+      <p class="note">Demo only: these details are not yet saved or sent.</p>
+    </section>
+
+    <section class="card">
+      <h2>List a Property</h2>
+      <form onsubmit="listProperty(event)">
+        <input id="listing" placeholder="Property title" required>
+        <input id="location" placeholder="Town or suburb" required>
+        <input id="price" type="number" min="1" placeholder="Price in rand (R)" required>
+        <select id="listingType">
+          <option>House</option>
+          <option>Flat or Apartment</option>
+          <option>Room to Rent</option>
+          <option>Commercial</option>
+          <option>Land</option>
+        </select>
+        <button type="submit">Preview Listing</button>
+      </form>
+      <div id="preview"></div>
+      <p class="note">Demo only: listings are not yet published online.</p>
+    </section>
+  </main>
+
+  <script>
+    function searchProperties() {
+      const area = document.getElementById('area').value || 'South Africa';
+      const type = document.getElementById('type').value || 'all property types';
+      const purpose = document.getElementById('purpose').value;
+      document.getElementById('result').textContent =
+        'Search selected: ' + type + ' in ' + area + ' — ' + purpose +
+        '. Property database connection is the next step.';
+    }
+
+    function registerAgency(event) {
+      event.preventDefault();
+      alert('Agency form demo completed. Online registration will be connected later.');
+    }
+
+    function listProperty(event) {
+      event.preventDefault();
+      const title = document.getElementById('listing').value;
+      const location = document.getElementById('location').value;
+      const price = Number(document.getElementById('price').value);
+      const type = document.getElementById('listingType').value;
+      document.getElementById('preview').textContent =
+        title + ' | ' + location + ' | R' + price.toLocaleString('en-ZA') +
+        ' | ' + type;
+    }
+  </script>
+</body>
+</html>
