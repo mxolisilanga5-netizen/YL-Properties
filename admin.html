@@ -1,1 +1,211 @@
 
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>YL Properties | Admin</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; background: #f4f6f8; color: #222; }
+    header { background: #12345a; color: white; padding: 20px; text-align: center; }
+    main { max-width: 900px; margin: 24px auto; padding: 16px; }
+    section, .property { background: white; padding: 18px; margin-bottom: 16px; border-radius: 10px; }
+    input, button { box-sizing: border-box; width: 100%; padding: 12px; margin: 7px 0; }
+    button { background: #12345a; color: white; border: 0; border-radius: 6px; font-weight: bold; }
+    button:disabled { opacity: .5; }
+    .approve { background: #18794e; }
+    .status { overflow-wrap: anywhere; }
+    .error { color: #b42318; }
+    .success { color: #18794e; }
+  </style>
+</head>
+<body>
+<header>
+  <h1>YL Properties</h1>
+  <p>Administrator dashboard</p>
+</header>
+
+<main>
+  <section id="loginSection">
+    <h2>Admin sign in</h2>
+    <p>Sign in with the administrator account you created in Supabase.</p>
+    <form id="loginForm">
+      <label for="email">Email address</label>
+      <input id="email" type="email" autocomplete="username" required>
+      <label for="password">Password</label>
+      <input id="password" type="password" autocomplete="current-password" required>
+      <button type="submit">Sign in</button>
+    </form>
+    <p id="loginMessage" role="status"></p>
+  </section>
+
+  <section id="dashboard" hidden>
+    <h2>Pending property listings</h2>
+    <p id="accountInfo"></p>
+    <button id="refreshButton">Refresh listings</button>
+    <button id="logoutButton" type="button">Sign out</button>
+    <p id="dashboardMessage" role="status"></p>
+    <div id="listings"></div>
+  </section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = "https://jrceojhprekafyynlxwp.supabase.co";
+const SUPABASE_KEY = "sb_publishable_m9iZCpaNXG-XKtSjUkcCSQ_-ICKds7a";
+
+const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const loginSection = document.getElementById("loginSection");
+const dashboard = document.getElementById("dashboard");
+const loginMessage = document.getElementById("loginMessage");
+const dashboardMessage = document.getElementById("dashboardMessage");
+const listings = document.getElementById("listings");
+
+function message(element, text, type) {
+  element.textContent = text;
+  element.className = type || "";
+}
+
+async function checkAdmin() {
+  const { data: { user } } = await db.auth.getUser();
+
+  if (!user) {
+    loginSection.hidden = false;
+    dashboard.hidden = true;
+    return;
+  }
+
+  const { data, error } = await db
+    .from("admin_users")
+    .select("user_id")
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  if (error || !data) {
+    await db.auth.signOut();
+    loginSection.hidden = false;
+    dashboard.hidden = true;
+    message(loginMessage, "This account is not authorised as an administrator.", "error");
+    return;
+  }
+
+  loginSection.hidden = true;
+  dashboard.hidden = false;
+  document.getElementById("accountInfo").textContent =
+    "Signed in as " + user.email;
+  await loadPending();
+}
+
+document.getElementById("loginForm").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  message(loginMessage, "Signing in…");
+
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+
+  const { error } = await db.auth.signInWithPassword({ email, password });
+
+  if (error) {
+    message(loginMessage, "Sign-in failed: " + error.message, "error");
+    return;
+  }
+
+  await checkAdmin();
+});
+
+async function loadPending() {
+  listings.replaceChildren();
+  message(dashboardMessage, "Loading pending listings…");
+
+  const { data, error } = await db
+    .from("properties")
+    .select("id,title,description,province,city,suburb,property_type,listing_purpose,price,contact_phone,status,created_at")
+    .eq("status", "Pending")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    message(dashboardMessage, "Could not load listings: " + error.message, "error");
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    message(dashboardMessage, "There are no pending listings.");
+    return;
+  }
+
+  message(dashboardMessage, data.length + " pending listing(s).");
+
+  data.forEach((property) => {
+    const card = document.createElement("article");
+    card.className = "property";
+
+    const title = document.createElement("h3");
+    title.textContent = property.title || "Untitled property";
+    card.appendChild(title);
+
+    const details = [
+      ["Location", [property.suburb, property.city, property.province].filter(Boolean).join(", ")],
+      ["Type", property.property_type],
+      ["Purpose", property.listing_purpose],
+      ["Price", property.price],
+      ["Contact", property.contact_phone],
+      ["Description", property.description],
+      ["Status", property.status],
+      ["Listing ID", property.id]
+    ];
+
+    details.forEach(([label, value]) => {
+      if (value !== null && value !== undefined && value !== "") {
+        const p = document.createElement("p");
+        p.className = "status";
+        p.textContent = label + ": " + value;
+        card.appendChild(p);
+      }
+    });
+
+    const approve = document.createElement("button");
+    approve.className = "approve";
+    approve.textContent = "Approve and publish";
+    approve.addEventListener("click", async () => {
+      if (!confirm("Publish this property on the public website?")) return;
+
+      approve.disabled = true;
+      const { error: updateError } = await db
+        .from("properties")
+        .update({ status: "Published" })
+        .eq("id", property.id)
+        .eq("status", "Pending");
+
+      if (updateError) {
+        message(dashboardMessage, "Approval failed: " + updateError.message, "error");
+        approve.disabled = false;
+        return;
+      }
+
+      message(dashboardMessage, "Approval request completed. Refresh to verify the result.", "success");
+      await loadPending();
+    });
+
+    card.appendChild(approve);
+    listings.appendChild(card);
+  });
+}
+
+document.getElementById("refreshButton").addEventListener("click", loadPending);
+
+document.getElementById("logoutButton").addEventListener("click", async () => {
+  await db.auth.signOut();
+  listings.replaceChildren();
+  await checkAdmin();
+});
+
+db.auth.onAuthStateChange(() => {
+  setTimeout(checkAdmin, 0);
+});
+
+checkAdmin();
+</script>
+</body>
+</html>
