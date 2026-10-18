@@ -202,15 +202,54 @@ async function searchProperties() {
       alert('Agency form demo completed. Online registration will be connected later.');
     }
 
-    function listProperty(event) {
-      event.preventDefault();
-      const title = document.getElementById('listing').value;
-      const location = document.getElementById('location').value;
-      const price = Number(document.getElementById('price').value);
-      const type = document.getElementById('listingType').value;
-      document.getElementById('preview').textContent =
-        title + ' | ' + location + ' | R' + price.toLocaleString('en-ZA') +
-        ' | ' + type;
+async function listProperty(event) {
+  event.preventDefault();
+
+  const button = document.querySelector(
+    '#propertyForm button[type="submit"]'
+  );
+  const message = document.getElementById('submitResult');
+
+  button.disabled = true;
+  message.textContent = 'Submitting your property...';
+
+  const property = {
+    title: document.getElementById('listing').value.trim(),
+    description: document.getElementById('description').value.trim(),
+    province: document.getElementById('province').value,
+    city: document.getElementById('city').value.trim(),
+    suburb: document.getElementById('suburb').value.trim() || null,
+    property_type: document.getElementById('listingType').value,
+    listing_purpose: document.getElementById('listingPurpose').value,
+    price: Number(document.getElementById('price').value),
+    contact_phone: document.getElementById('phone').value.trim() || null,
+    status: 'Pending'
+  };
+
+  try {
+    const { error } = await supabaseClient
+      .from('properties')
+      .insert([property]);
+
+    if (error) throw error;
+
+    message.textContent =
+      'Property submitted successfully! It is awaiting review.';
+    document.getElementById('propertyForm').reset();
+
+  } catch (error) {
+    console.error(error);
+    message.textContent =
+      'Submission failed. Please try again later.';
+  } finally {
+    button.disabled = false;
+  }
+}
+
+document.getElementById('propertyForm').addEventListener(
+  'submit', listProperty
+);
+
     }
   </script>
 </body>
