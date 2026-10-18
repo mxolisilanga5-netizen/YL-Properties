@@ -117,14 +117,55 @@
   </main>
 
   <script>
-    function searchProperties() {
-      const area = document.getElementById('area').value || 'South Africa';
-      const type = document.getElementById('type').value || 'all property types';
-      const purpose = document.getElementById('purpose').value;
-      document.getElementById('result').textContent =
-        'Search selected: ' + type + ' in ' + area + ' — ' + purpose +
-        '. Property database connection is the next step.';
+    
+async function searchProperties() {
+  const area = document.getElementById('area').value.trim().toLowerCase();
+  const type = document.getElementById('type').value;
+  const purpose = document.getElementById('purpose').value === 'For Sale'
+    ? 'Sale' : 'Rent';
+
+  const result = document.getElementById('result');
+  result.textContent = 'Searching properties...';
+  result.style.whiteSpace = 'pre-line';
+
+  try {
+    const { data, error } = await supabaseClient
+      .from('properties')
+      .select('title, description, province, city, suburb, property_type, listing_purpose, price, contact_phone')
+      .eq('status', 'Published');
+
+    if (error) throw error;
+
+    const matches = (data || []).filter(p => {
+      const location = [p.city, p.suburb, p.province]
+        .filter(Boolean).join(' ').toLowerCase();
+
+      return (!area || location.includes(area)) &&
+        (!type || p.property_type === type) &&
+        p.listing_purpose === purpose;
+    });
+
+    if (matches.length === 0) {
+      result.textContent =
+        'No published properties found. Please try another search.';
+      return;
     }
+
+    result.textContent = matches.map(p =>
+      p.title + '\n' +
+      [p.suburb, p.city, p.province].filter(Boolean).join(', ') + '\n' +
+      'Price: R' + Number(p.price).toLocaleString('en-ZA') + '\n' +
+      'Type: ' + p.property_type +
+      (p.contact_phone ? '\nContact: ' + p.contact_phone : '')
+    ).join('\n\n--------------------\n\n');
+
+  } catch (error) {
+    console.error(error);
+    result.textContent =
+      'Unable to load properties. Please try again later.';
+  }
+}
+
 
     function registerAgency(event) {
       event.preventDefault();
