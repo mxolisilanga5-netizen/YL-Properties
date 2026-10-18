@@ -1,256 +1,504 @@
 
 <!DOCTYPE html>
 <html lang="en">
- 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-  const SUPABASE_URL = "PASTE_YOUR_PROJECT_URL_HERE";
-  const SUPABASE_KEY = "PASTE_YOUR_SB_PUBLISHABLE_KEY_HERE";
-
-  const supabaseClient = window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY
-  );
-</script>
- 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>SA Property Connect</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <style>
+    * { box-sizing: border-box; }
+
     body {
-      font-family: Arial, sans-serif;
       margin: 0;
-      background: #f3f5f7;
+      font-family: Arial, sans-serif;
+      background: #f1f5f9;
       color: #172554;
     }
+
     header {
       background: #12315b;
       color: white;
-      padding: 28px 16px;
       text-align: center;
+      padding: 30px 15px;
     }
+
     header h1 { margin: 0 0 10px; }
-    main { max-width: 750px; margin: 20px auto; padding: 15px; }
+
+    nav {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      background: #0b2344;
+      padding: 12px;
+    }
+
+    nav a {
+      color: white;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    main {
+      max-width: 850px;
+      margin: 20px auto;
+      padding: 12px;
+    }
+
     .card {
       background: white;
       padding: 20px;
-      margin-bottom: 18px;
+      margin-bottom: 20px;
       border-radius: 12px;
       box-shadow: 0 2px 8px #0001;
     }
+
     input, select, textarea, button {
+      display: block;
       width: 100%;
-      padding: 12px;
-      margin: 8px 0;
-      box-sizing: border-box;
-      border-radius: 6px;
+      padding: 13px;
+      margin: 10px 0;
+      border-radius: 7px;
       font-size: 16px;
     }
-    input, select, textarea { border: 1px solid #ccd3dd; }
+
+    input, select, textarea {
+      background: white;
+      border: 1px solid #cbd5e1;
+      color: #172554;
+    }
+
+    select {
+      min-height: 48px;
+      cursor: pointer;
+    }
+
     button {
+      border: 0;
       background: #087f8c;
       color: white;
-      border: 0;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: wait;
+    }
+
+    .property {
+      border: 1px solid #dbe3ed;
+      padding: 15px;
+      margin-top: 15px;
+      border-radius: 9px;
+      overflow-wrap: anywhere;
+    }
+
+    .price {
+      color: #087f8c;
+      font-size: 20px;
       font-weight: bold;
     }
-    .note { color: #526174; font-size: 14px; }
+
+    .message {
+      white-space: pre-line;
+      overflow-wrap: anywhere;
+    }
+
+    .small {
+      color: #526174;
+      font-size: 14px;
+    }
+
+    footer {
+      text-align: center;
+      padding: 20px;
+      color: #526174;
+    }
   </style>
 </head>
+
 <body>
   <header>
     <h1>SA Property Connect</h1>
     <p>Connecting South Africa to property opportunities</p>
+    <p>Buy • Sell • Rent • Find a Home</p>
   </header>
+
+  <nav>
+    <a href="#search">Find Property</a>
+    <a href="#list">List Property</a>
+    <a href="#agency">Register Agency</a>
+  </nav>
+
   <main>
-    <section class="card">
+    <section class="card" id="search">
       <h2>Find a Property</h2>
-      <p>Search for houses, flats, rooms and commercial properties.</p>
-      <input id="area" placeholder="Enter town or suburb">
-      <select id="type">
-        <option value="">All property types</option>
-        <option>House</option>
-        <option>Flat or Apartment</option>
-        <option>Room to Rent</option>
-        <option>Commercial</option>
-        <option>Land</option>
-      </select>
-      <select id="purpose">
-        <option>For Sale</option>
-        <option>For Rent</option>
-      </select>
-      <button onclick="searchProperties()">Search Properties</button>
-      <p id="result"></p>
+
+      <form id="searchForm">
+        <input id="searchArea"
+          placeholder="Enter province, city or suburb">
+
+        <select id="searchProvince">
+          <option value="">All provinces</option>
+          <option>Eastern Cape</option>
+          <option>Free State</option>
+          <option>Gauteng</option>
+          <option>KwaZulu-Natal</option>
+          <option>Limpopo</option>
+          <option>Mpumalanga</option>
+          <option>Northern Cape</option>
+          <option>North West</option>
+          <option>Western Cape</option>
+        </select>
+
+        <select id="searchType">
+          <option value="">All property types</option>
+          <option>House</option>
+          <option>Flat or Apartment</option>
+          <option>Room to Rent</option>
+          <option>Commercial</option>
+          <option>Land</option>
+        </select>
+
+        <select id="searchPurpose">
+          <option value="">For sale and rent</option>
+          <option value="Sale">For Sale</option>
+          <option value="Rent">For Rent</option>
+        </select>
+
+        <button type="submit">Search Properties</button>
+      </form>
+
+      <p id="searchMessage" class="message" role="status">
+        Enter your search details to find published properties.
+      </p>
+      <div id="results"></div>
+    </section>
+
+    <section class="card" id="list">
+      <h2>List a Property</h2>
+      <p>Submit a property for review before publication.</p>
+
+      <form id="propertyForm">
+        <input id="listingTitle"
+          placeholder="Property title" required>
+
+        <textarea id="listingDescription"
+          placeholder="Describe the property"></textarea>
+
+        <select id="listingProvince" required>
+          <option value="">Select province</option>
+          <option>Eastern Cape</option>
+          <option>Free State</option>
+          <option>Gauteng</option>
+          <option>KwaZulu-Natal</option>
+          <option>Limpopo</option>
+          <option>Mpumalanga</option>
+          <option>Northern Cape</option>
+          <option>North West</option>
+          <option>Western Cape</option>
+        </select>
+
+        <input id="listingCity"
+          placeholder="City or town" required>
+
+        <input id="listingSuburb"
+          placeholder="Suburb">
+
+        <select id="listingType" required>
+          <option value="">Select property type</option>
+          <option>House</option>
+          <option>Flat or Apartment</option>
+          <option>Room to Rent</option>
+          <option>Commercial</option>
+          <option>Land</option>
+        </select>
+
+        <select id="listingPurpose" required>
+          <option value="Sale">For Sale</option>
+          <option value="Rent">For Rent</option>
+        </select>
+
+        <input id="listingPrice" type="number"
+          min="1" step="0.01"
+          placeholder="Price in rand (R)" required>
+
+        <input id="listingPhone" type="tel"
+          placeholder="Contact phone number">
+
+        <button type="submit">Submit Property</button>
+      </form>
+
+      <p id="listingMessage" class="message" role="status"></p>
+    </section>
+
+    <section class="card" id="agency">
+      <h2>Register Your Agency</h2>
+      <p>Estate agencies can register their interest in joining our platform.</p>
+
+      <form id="agencyForm">
+        <input id="agencyName"
+          placeholder="Agency name" required>
+
+        <input id="agencyContact"
+          placeholder="Contact person's name" required>
+
+        <input id="agencyEmail" type="email"
+          placeholder="Business email" required>
+
+        <input id="agencyPhone" type="tel"
+          placeholder="Business phone number" required>
+
+        <select id="agencyProvince" required>
+          <option value="">Select province</option>
+          <option>Eastern Cape</option>
+          <option>Free State</option>
+          <option>Gauteng</option>
+          <option>KwaZulu-Natal</option>
+          <option>Limpopo</option>
+          <option>Mpumalanga</option>
+          <option>Northern Cape</option>
+          <option>North West</option>
+          <option>Western Cape</option>
+        </select>
+
+        <button type="submit">Register Agency</button>
+      </form>
+
+      <p id="agencyMessage" class="message" role="status"></p>
     </section>
 
     <section class="card">
-      <h2>Register Your Agency</h2>
-      <p class="note">For estate agencies and property practitioners.</p>
-      <form onsubmit="registerAgency(event)">
-        <input id="agency" placeholder="Agency name" required>
-        <input id="contact" placeholder="Contact person" required>
-        <input id="email" type="email" placeholder="Email address" required>
-        <input id="phone" type="tel" placeholder="Phone number" required>
-        <button type="submit">Submit Agency Details</button>
-      </form>
-      <p class="note">Demo only: these details are not yet saved or sent.</p>
+      <h2>About SA Property Connect</h2>
+      <p>
+        Our goal is to connect buyers, sellers, tenants, landlords
+        and property agencies across all nine provinces of South Africa.
+      </p>
+      <p class="small">
+        Listings are subject to review. Always verify property ownership
+        and the legitimacy of a seller or agent before making payment.
+      </p>
     </section>
-
-<section class="card">
-  <h2>List a Property</h2>
-  <p>Submit your property for review before publication.</p>
-
-  <form id="propertyForm">
-    <input id="listing" placeholder="Property title" required>
-    <textarea id="description" placeholder="Property description"></textarea>
-
-    <select id="province" required>
-      <option value="">Select province</option>
-      <option>Eastern Cape</option>
-      <option>Free State</option>
-      <option>Gauteng</option>
-      <option>KwaZulu-Natal</option>
-      <option>Limpopo</option>
-      <option>Mpumalanga</option>
-      <option>Northern Cape</option>
-      <option>North West</option>
-      <option>Western Cape</option>
-    </select>
-
-    <input id="city" placeholder="City or town" required>
-    <input id="suburb" placeholder="Suburb">
-
-    <select id="listingType" required>
-      <option value="">Select property type</option>
-      <option>House</option>
-      <option>Flat or Apartment</option>
-      <option>Room to Rent</option>
-      <option>Commercial</option>
-      <option>Land</option>
-    </select>
-
-    <select id="listingPurpose" required>
-      <option value="Sale">For Sale</option>
-      <option value="Rent">For Rent</option>
-    </select>
-
-    <input id="price" type="number" min="1"
-      placeholder="Price in rand (R)" required>
-    <input id="phone" type="tel"
-      placeholder="Contact phone number">
-
-    <button type="submit">Submit Property</button>
-  </form>
-  <p id="submitResult" role="status"></p>
-</section>
-
   </main>
 
+  <footer>
+    <p>SA Property Connect | South Africa</p>
+  </footer>
+
   <script>
-    
-async function searchProperties() {
-  const area = document.getElementById('area').value.trim().toLowerCase();
-  const type = document.getElementById('type').value;
-  const purpose = document.getElementById('purpose').value === 'For Sale'
-    ? 'Sale' : 'Rent';
+    // IMPORTANT: Replace both placeholders with your real Supabase details.
+    const SUPABASE_URL = "PASTE_YOUR_PROJECT_URL_HERE";
+    const SUPABASE_KEY = "PASTE_YOUR_SB_PUBLISHABLE_KEY_HERE";
 
-  const result = document.getElementById('result');
-  result.textContent = 'Searching properties...';
-  result.style.whiteSpace = 'pre-line';
+    let db = null;
 
-  try {
-    const { data, error } = await supabaseClient
-      .from('properties')
-      .select('title, description, province, city, suburb, property_type, listing_purpose, price, contact_phone')
-      .eq('status', 'Published');
-
-    if (error) throw error;
-
-    const matches = (data || []).filter(p => {
-      const location = [p.city, p.suburb, p.province]
-        .filter(Boolean).join(' ').toLowerCase();
-
-      return (!area || location.includes(area)) &&
-        (!type || p.property_type === type) &&
-        p.listing_purpose === purpose;
-    });
-
-    if (matches.length === 0) {
-      result.textContent =
-        'No published properties found. Please try another search.';
-      return;
+    if (
+      window.supabase &&
+      SUPABASE_URL.startsWith("https://") &&
+      SUPABASE_KEY.startsWith("sb_publishable_")
+    ) {
+      db = window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY
+      );
     }
 
-    result.textContent = matches.map(p =>
-      p.title + '\n' +
-      [p.suburb, p.city, p.province].filter(Boolean).join(', ') + '\n' +
-      'Price: R' + Number(p.price).toLocaleString('en-ZA') + '\n' +
-      'Type: ' + p.property_type +
-      (p.contact_phone ? '\nContact: ' + p.contact_phone : '')
-    ).join('\n\n--------------------\n\n');
-
-  } catch (error) {
-    console.error(error);
-    result.textContent =
-      'Unable to load properties. Please try again later.';
-  }
-}
-
-
-    function registerAgency(event) {
-      event.preventDefault();
-      alert('Agency form demo completed. Online registration will be connected later.');
+    function showMessage(id, text) {
+      document.getElementById(id).textContent = text;
     }
 
-async function listProperty(event) {
-  event.preventDefault();
-
-  const button = document.querySelector(
-    '#propertyForm button[type="submit"]'
-  );
-  const message = document.getElementById('submitResult');
-
-  button.disabled = true;
-  message.textContent = 'Submitting your property...';
-
-  const property = {
-    title: document.getElementById('listing').value.trim(),
-    description: document.getElementById('description').value.trim(),
-    province: document.getElementById('province').value,
-    city: document.getElementById('city').value.trim(),
-    suburb: document.getElementById('suburb').value.trim() || null,
-    property_type: document.getElementById('listingType').value,
-    listing_purpose: document.getElementById('listingPurpose').value,
-    price: Number(document.getElementById('price').value),
-    contact_phone: document.getElementById('phone').value.trim() || null,
-    status: 'Pending'
-  };
-
-  try {
-    const { error } = await supabaseClient
-      .from('properties')
-      .insert([property]);
-
-    if (error) throw error;
-
-    message.textContent =
-      'Property submitted successfully! It is awaiting review.';
-    document.getElementById('propertyForm').reset();
-
-  } catch (error) {
-    console.error(error);
-    message.textContent =
-      'Submission failed. Please try again later.';
-  } finally {
-    button.disabled = false;
-  }
-}
-
-document.getElementById('propertyForm').addEventListener(
-  'submit', listProperty
-);
-
+    function checkConnection() {
+      if (!db) {
+        throw new Error(
+          "Supabase is not configured. Add your Project URL and publishable key."
+        );
+      }
     }
+
+    // SEARCH PUBLISHED PROPERTIES
+    document.getElementById("searchForm")
+      .addEventListener("submit", async function(event) {
+        event.preventDefault();
+
+        const message = document.getElementById("searchMessage");
+        const results = document.getElementById("results");
+
+        results.replaceChildren();
+        message.textContent = "Searching properties...";
+
+        try {
+          checkConnection();
+
+          let query = db.from("properties")
+            .select(
+              "id,title,description,province,city,suburb,property_type,listing_purpose,price,contact_phone"
+            )
+            .eq("status", "Published");
+
+          const province =
+            document.getElementById("searchProvince").value;
+          const type =
+            document.getElementById("searchType").value;
+          const purpose =
+            document.getElementById("searchPurpose").value;
+
+          if (province) query = query.eq("province", province);
+          if (type) query = query.eq("property_type", type);
+          if (purpose) query = query.eq("listing_purpose", purpose);
+
+          const { data, error } = await query.limit(100);
+          if (error) throw error;
+
+          const area = document.getElementById("searchArea")
+            .value.trim().toLowerCase();
+
+          const matches = (data || []).filter(function(property) {
+            const location = [
+              property.province,
+              property.city,
+              property.suburb
+            ].filter(Boolean).join(" ").toLowerCase();
+
+            return !area || location.includes(area);
+          });
+
+          if (!matches.length) {
+            message.textContent =
+              "No published properties match your search yet.";
+            return;
+          }
+
+          message.textContent =
+            matches.length + " published property result(s).";
+
+          matches.forEach(function(property) {
+            const card = document.createElement("article");
+            card.className = "property";
+
+            const title = document.createElement("h3");
+            title.textContent = property.title;
+
+            const price = document.createElement("p");
+            price.className = "price";
+            price.textContent =
+              "R" + Number(property.price).toLocaleString("en-ZA");
+
+            const details = document.createElement("p");
+            details.textContent = [
+              property.property_type,
+              property.listing_purpose === "Sale"
+                ? "For Sale" : "For Rent",
+              property.suburb,
+              property.city,
+              property.province
+            ].filter(Boolean).join(" | ");
+
+            const description = document.createElement("p");
+            description.textContent = property.description || "";
+
+            card.append(title, price, details, description);
+
+            if (property.contact_phone) {
+              const contact = document.createElement("p");
+              contact.textContent = "Contact: " + property.contact_phone;
+              card.appendChild(contact);
+            }
+
+            results.appendChild(card);
+          });
+        } catch (error) {
+          console.error(error);
+          message.textContent =
+            "Could not load properties: " + error.message;
+        }
+      });
+
+    // SUBMIT PROPERTY FOR REVIEW
+    document.getElementById("propertyForm")
+      .addEventListener("submit", async function(event) {
+        event.preventDefault();
+
+        const button = this.querySelector('button[type="submit"]');
+        button.disabled = true;
+
+        try {
+          checkConnection();
+
+          const property = {
+            title: document.getElementById("listingTitle").value.trim(),
+            description: document.getElementById("listingDescription").value.trim(),
+            province: document.getElementById("listingProvince").value,
+            city: document.getElementById("listingCity").value.trim(),
+            suburb: document.getElementById("listingSuburb").value.trim() || null,
+            property_type: document.getElementById("listingType").value,
+            listing_purpose: document.getElementById("listingPurpose").value,
+            price: Number(document.getElementById("listingPrice").value),
+            contact_phone: document.getElementById("listingPhone").value.trim() || null,
+            status: "Pending"
+          };
+
+          const { error } = await db.from("properties").insert([property]);
+          if (error) throw error;
+
+          showMessage(
+            "listingMessage",
+            "Submitted successfully. Your property is awaiting review."
+          );
+          this.reset();
+
+        } catch (error) {
+          console.error(error);
+          showMessage(
+            "listingMessage",
+            "Submission failed: " + error.message
+          );
+        } finally {
+          button.disabled = false;
+        }
+      });
+
+    // REGISTER AGENCY
+    document.getElementById("agencyForm")
+      .addEventListener("submit", async function(event) {
+        event.preventDefault();
+
+        const button = this.querySelector('button[type="submit"]');
+        button.disabled = true;
+
+        try {
+          checkConnection();
+
+          const agency = {
+            agency_name: document.getElementById("agencyName").value.trim(),
+            contact_person: document.getElementById("agencyContact").value.trim(),
+            email: document.getElementById("agencyEmail").value.trim(),
+            phone: document.getElementById("agencyPhone").value.trim(),
+            province: document.getElementById("agencyProvince").value
+          };
+
+          const { error } = await db.from("agencies").insert([agency]);
+          if (error) throw error;
+
+          showMessage(
+            "agencyMessage",
+            "Agency registration submitted successfully."
+          );
+          this.reset();
+
+        } catch (error) {
+          console.error(error);
+          showMessage(
+            "agencyMessage",
+            "Registration failed: " + error.message
+          );
+        } finally {
+          button.disabled = false;
+        }
+      });
   </script>
 </body>
 </html>
