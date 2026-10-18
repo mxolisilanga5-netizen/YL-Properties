@@ -1,12 +1,11 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="google-site-verification" content="oJNmXy5Ncqyu3jwXYrSWFRXK1qaHBW_gW1VOQMG3m8o" />
-    
-    name="viewport" content="width=device-width, initial-scale=1">
-  <title>YL Properties</title>
+  <meta name="google-site-verification" content="oJNmXy5Ncqyu3jwXYrSWFRXK1qaHBW_gW1VOQMG3m8o">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>YL Properties | Buy, Sell and Rent Property in South Africa</title>
+  <meta name="description" content="Find properties for sale and rent across all nine provinces of South Africa with YL Properties. Buyers, sellers, landlords and agencies can connect.">
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -18,6 +17,7 @@
       font-family: Arial, sans-serif;
       background: #f1f5f9;
       color: #172554;
+      line-height: 1.5;
     }
 
     header {
@@ -28,14 +28,15 @@
     }
 
     header h1 { margin: 0 0 10px; }
+    header p { margin: 6px 0; }
 
     nav {
       display: flex;
       justify-content: center;
-      gap: 12px;
+      gap: 18px;
       flex-wrap: wrap;
       background: #0b2344;
-      padding: 12px;
+      padding: 14px;
     }
 
     nav a {
@@ -43,6 +44,8 @@
       text-decoration: none;
       font-weight: bold;
     }
+
+    nav a:hover { text-decoration: underline; }
 
     main {
       max-width: 850px;
@@ -78,6 +81,11 @@
       cursor: pointer;
     }
 
+    textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+
     button {
       border: 0;
       background: #087f8c;
@@ -85,6 +93,8 @@
       font-weight: bold;
       cursor: pointer;
     }
+
+    button:hover { background: #066772; }
 
     button:disabled {
       opacity: 0.6;
@@ -120,6 +130,13 @@
       padding: 20px;
       color: #526174;
     }
+
+    @media (max-width: 600px) {
+      header { padding: 25px 12px; }
+      main { margin: 12px auto; padding: 10px; }
+      .card { padding: 16px; }
+      nav { gap: 12px; }
+    }
   </style>
 </head>
 
@@ -134,11 +151,13 @@
     <a href="#search">Find Property</a>
     <a href="#list">List Property</a>
     <a href="#agency">Register Agency</a>
+    <a href="#about">About Us</a>
   </nav>
 
   <main>
     <section class="card" id="search">
       <h2>Find a Property</h2>
+      <p>Search published property listings across South Africa.</p>
 
       <form id="searchForm">
         <input id="searchArea"
@@ -274,7 +293,7 @@
       <p id="agencyMessage" class="message" role="status"></p>
     </section>
 
-    <section class="card">
+    <section class="card" id="about">
       <h2>About YL Properties</h2>
       <p>
         Our goal is to connect buyers, sellers, tenants, landlords
@@ -289,10 +308,10 @@
 
   <footer>
     <p>YL Properties | South Africa</p>
+    <p class="small">Connecting People. Creating Property Opportunities.</p>
   </footer>
 
   <script>
-    // IMPORTANT: Replace both placeholders with your real Supabase details.
     const SUPABASE_URL = "https://jrceojhprekafyynlxwp.supabase.co";
     const SUPABASE_KEY = "sb_publishable_m9iZCpaNXG-XKtSjUkcCSQ_-ICKds7a";
 
@@ -316,7 +335,7 @@
     function checkConnection() {
       if (!db) {
         throw new Error(
-          "Supabase is not configured. Add your Project URL and publishable key."
+          "Supabase could not be configured. Check the project URL and publishable key."
         );
       }
     }
@@ -415,7 +434,7 @@
         } catch (error) {
           console.error(error);
           message.textContent =
-            "Could not load properties: " + error.message;
+            "Could not load properties. Please check your connection and database permissions.";
         }
       });
 
@@ -456,7 +475,7 @@
           console.error(error);
           showMessage(
             "listingMessage",
-            "Submission failed: " + error.message
+            "Submission failed. Please check your database permissions and try again."
           );
         } finally {
           button.disabled = false;
@@ -495,7 +514,7 @@
           console.error(error);
           showMessage(
             "agencyMessage",
-            "Registration failed: " + error.message
+            "Registration failed. Please check your database permissions and try again."
           );
         } finally {
           button.disabled = false;
