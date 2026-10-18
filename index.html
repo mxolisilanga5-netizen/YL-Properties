@@ -96,24 +96,54 @@
       <p class="note">Demo only: these details are not yet saved or sent.</p>
     </section>
 
-    <section class="card">
-      <h2>List a Property</h2>
-      <form onsubmit="listProperty(event)">
-        <input id="listing" placeholder="Property title" required>
-        <input id="location" placeholder="Town or suburb" required>
-        <input id="price" type="number" min="1" placeholder="Price in rand (R)" required>
-        <select id="listingType">
-          <option>House</option>
-          <option>Flat or Apartment</option>
-          <option>Room to Rent</option>
-          <option>Commercial</option>
-          <option>Land</option>
-        </select>
-        <button type="submit">Preview Listing</button>
-      </form>
-      <div id="preview"></div>
-      <p class="note">Demo only: listings are not yet published online.</p>
-    </section>
+<section class="card">
+  <h2>List a Property</h2>
+  <p>Submit your property for review before publication.</p>
+
+  <form id="propertyForm">
+    <input id="listing" placeholder="Property title" required>
+    <textarea id="description" placeholder="Property description"></textarea>
+
+    <select id="province" required>
+      <option value="">Select province</option>
+      <option>Eastern Cape</option>
+      <option>Free State</option>
+      <option>Gauteng</option>
+      <option>KwaZulu-Natal</option>
+      <option>Limpopo</option>
+      <option>Mpumalanga</option>
+      <option>Northern Cape</option>
+      <option>North West</option>
+      <option>Western Cape</option>
+    </select>
+
+    <input id="city" placeholder="City or town" required>
+    <input id="suburb" placeholder="Suburb">
+
+    <select id="listingType" required>
+      <option value="">Select property type</option>
+      <option>House</option>
+      <option>Flat or Apartment</option>
+      <option>Room to Rent</option>
+      <option>Commercial</option>
+      <option>Land</option>
+    </select>
+
+    <select id="listingPurpose" required>
+      <option value="Sale">For Sale</option>
+      <option value="Rent">For Rent</option>
+    </select>
+
+    <input id="price" type="number" min="1"
+      placeholder="Price in rand (R)" required>
+    <input id="phone" type="tel"
+      placeholder="Contact phone number">
+
+    <button type="submit">Submit Property</button>
+  </form>
+  <p id="submitResult" role="status"></p>
+</section>
+
   </main>
 
   <script>
