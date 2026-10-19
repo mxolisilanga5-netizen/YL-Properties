@@ -1,671 +1,343 @@
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="google-site-verification" content="oJNmXy5Ncqyu3jwXYrSWFRXK1qaHBW_gW1VOQMG3m8o">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>YL Properties | Buy, Sell and Rent Property in South Africa</title>
-<meta name="description" content="Find properties for sale and rent across all nine provinces of South Africa.">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<style>
-*{box-sizing:border-box}
-body{margin:0;font-family:Arial,sans-serif;background:#f1f5f9;color:#172554;line-height:1.5}
-header{background:#12315b;color:white;text-align:center;padding:30px 15px}
-header h1{margin:0 0 10px}
-nav{display:flex;justify-content:center;gap:15px;flex-wrap:wrap;background:#0b2344;padding:14px}
-nav a{color:white;text-decoration:none;font-weight:bold}
-main{max-width:850px;margin:20px auto;padding:12px}
-.card{background:white;padding:20px;margin-bottom:20px;border-radius:12px;box-shadow:0 2px 8px #0001}
-input,select,textarea,button{display:block;width:100%;padding:13px;margin:10px 0;border-radius:7px;font-size:16px}
-input,select,textarea{background:white;border:1px solid #cbd5e1;color:#172554}
-textarea{min-height:100px;resize:vertical}
-button{border:0;background:#087f8c;color:white;font-weight:bold;cursor:pointer}
-button:disabled{opacity:.6}
-.property{border:1px solid #dbe3ed;padding:15px;margin-top:15px;border-radius:9px;overflow-wrap:anywhere}
-  .agency-card{
-  border:1px solid #dbe3ed;
-  padding:15px;
-  margin-top:15px;
-  border-radius:9px;
-  overflow-wrap:anywhere;
-  background:#fff;
-}
-.agency-card h3{
-  color:#087f8c;
-  margin-top:0;
-}
-.price{color:#087f8c;font-size:20px;font-weight:bold}
-.message{white-space:pre-line;overflow-wrap:anywhere}
-.small{color:#526174;font-size:14px}
-.property-photos{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
-.property-photos img{width:calc(50% - 8px);max-width:240px;aspect-ratio:4/3;object-fit:cover;border-radius:8px}
-footer{text-align:center;padding:20px;color:#526174}
-@media(max-width:600px){header{padding:25px 12px}main{margin:12px auto;padding:10px}.card{padding:16px}}
-</style>
-</head>
-<body>
-<header>
-<h1>YL Properties</h1>
-<p>Connecting South Africa to property opportunities</p>
-<p>Buy • Sell • Rent • Find a Home</p>
-</header>
+/* YL PROPERTIES — MODERN PROPERTY WEBSITE DESIGN */
 
-<nav>
-  <a href="#search">Find Property</a>
-  <a href="#list">List Property</a>
-  <a href="#agencyDirectory">Agency Directory</a>
-  <a href="#agency">Register Agency</a>
-  <a href="#enquiry">Enquiries</a>
-  <a href="#about">About Us</a>
-</nav>
-
-<main>
-<section class="card" id="search">
-<h2>Find a Property</h2>
-<p>Search published property listings across South Africa.</p>
-<form id="searchForm">
-<input id="searchArea" placeholder="Enter province, city or suburb">
-<select id="searchProvince">
-<option value="">All provinces</option>
-<option>Eastern Cape</option><option>Free State</option>
-<option>Gauteng</option><option>KwaZulu-Natal</option>
-<option>Limpopo</option><option>Mpumalanga</option>
-<option>Northern Cape</option><option>North West</option>
-<option>Western Cape</option>
-</select>
-<select id="searchType">
-<option value="">All property types</option>
-<option>House</option><option>Flat or Apartment</option>
-<option>Room to Rent</option><option>Commercial</option><option>Land</option>
-</select>
-<select id="searchPurpose">
-<option value="">For sale and rent</option>
-<option value="Sale">For Sale</option>
-<option value="Rent">For Rent</option>
-</select>
-<button type="submit">Search Properties</button>
-</form>
-<p id="searchMessage" class="message" role="status">Search to find published properties.</p>
-<div id="results"></div>
-</section>
-
-<section class="card" id="agencyDirectory">
-  <h2>Agency Directory</h2>
-  <p>Browse approved estate agencies across South Africa.</p>
-
-  <form id="agencySearchForm">
-    <input id="agencySearchText"
-           placeholder="Search agency name or province">
-
-    <select id="agencySearchProvince">
-      <option value="">All provinces</option>
-      <option>Eastern Cape</option>
-      <option>Free State</option>
-      <option>Gauteng</option>
-      <option>KwaZulu-Natal</option>
-      <option>Limpopo</option>
-      <option>Mpumalanga</option>
-      <option>Northern Cape</option>
-      <option>North West</option>
-      <option>Western Cape</option>
-    </select>
-
-    <button type="submit">Search Agencies</button>
-  </form>
-
-  <p id="agencyDirectoryMessage" class="message" role="status">
-    Loading approved agencies...
-  </p>
-
-  <div id="agencyDirectoryResults"></div>
-</section>
-
-<section class="card" id="list">
-<h2>List a Property</h2>
-<p>Submit your property for review before publication.</p>
-<form id="propertyForm">
-<input id="listingTitle" placeholder="Property title" required>
-<textarea id="listingDescription" placeholder="Describe the property"></textarea>
-<select id="listingProvince" required>
-<option value="">Select province</option>
-<option>Eastern Cape</option><option>Free State</option>
-<option>Gauteng</option><option>KwaZulu-Natal</option>
-<option>Limpopo</option><option>Mpumalanga</option>
-<option>Northern Cape</option><option>North West</option>
-<option>Western Cape</option>
-</select>
-<input id="listingCity" placeholder="City or town" required>
-<input id="listingSuburb" placeholder="Suburb">
-<select id="listingType" required>
-<option value="">Select property type</option>
-<option>House</option><option>Flat or Apartment</option>
-<option>Room to Rent</option><option>Commercial</option><option>Land</option>
-</select>
-<select id="listingPurpose" required>
-<option value="Sale">For Sale</option>
-<option value="Rent">For Rent</option>
-</select>
-<input id="listingPrice" type="number" min="1" step="0.01" placeholder="Price in rand (R)" required>
-<input id="listingPhone" type="tel" placeholder="Contact phone number">
-
-<label for="listingPhotos">Property photos (up to 5)</label>
-<input id="listingPhotos" type="file" accept="image/jpeg,image/png,image/webp" multiple>
-<p class="small">Choose up to 5 JPG, PNG or WebP photos, maximum 5 MB each. Upload property photos only, not private documents.</p>
-
-<button type="submit">Submit Property</button>
-</form>
-<p id="listingMessage" class="message" role="status"></p>
-</section>
-
-<section class="card" id="agency">
-<h2>Register Your Agency</h2>
-<p>Estate agencies can register their interest in joining our platform.</p>
-<form id="agencyForm">
-<input id="agencyName" placeholder="Agency name" required>
-<input id="agencyContact" placeholder="Contact person's name" required>
-<input id="agencyEmail" type="email" placeholder="Business email" required>
-<input id="agencyPhone" type="tel" placeholder="Business phone number" required>
-<select id="agencyProvince" required>
-<option value="">Select province</option>
-<option>Eastern Cape</option><option>Free State</option>
-<option>Gauteng</option><option>KwaZulu-Natal</option>
-<option>Limpopo</option><option>Mpumalanga</option>
-<option>Northern Cape</option><option>North West</option>
-<option>Western Cape</option>
-</select>
-<button type="submit">Register Agency</button>
-</form>
-<p id="agencyMessage" class="message" role="status"></p>
-</section>
-
-<section class="card" id="enquiry">
-<h2>Enquire About a Property</h2>
-<p>Tap Enquire on a property listing to select it, then send your message.</p>
-<form id="enquiryForm">
-<label for="enquiryPropertyId">Selected property ID</label>
-<input id="enquiryPropertyId" placeholder="Select Enquire on a listing" required>
-<input id="customerName" placeholder="Your full name" required>
-<input id="customerEmail" type="email" placeholder="Your email address">
-<input id="customerPhone" type="tel" placeholder="Your phone number">
-<textarea id="enquiryMessage" placeholder="Write your message" required></textarea>
-<button type="submit">Send Enquiry</button>
-</form>
-<p id="enquiryStatus" class="message" role="status"></p>
-</section>
-
-<section class="card" id="about">
-<h2>About YL Properties</h2>
-<p>Our goal is to connect buyers, sellers, tenants, landlords and property agencies across all nine provinces of South Africa.</p>
-<p class="small">Listings are subject to review. Always verify property ownership and the legitimacy of a seller or agent before making payment.</p>
-</section>
-</main>
-
-<footer>
-<p>YL Properties | South Africa</p>
-<p class="small">Connecting People. Creating Property Opportunities.</p>
-</footer>
-
-<script>
-const SUPABASE_URL = "https://jrceojhprekafyynlxwp.supabase.co";
-const SUPABASE_KEY = "sb_publishable_m9iZCpaNXG-XKtSjUkcCSQ_-ICKds7a";
-const PHOTO_BUCKET = "property-photos";
-const MAX_PHOTOS = 5;
-const MAX_FILE_SIZE = 5 * 1024 * 1024;
-
-const db = window.supabase
-  ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
-  : null;
-
-function checkConnection() {
-  if (!db) throw new Error("Supabase connection failed. Check the project URL and publishable key.");
-}
-function showMessage(id, text) {
-  document.getElementById(id).textContent = text;
-}
-function setBusy(form, busy) {
-  const button = form.querySelector('button[type="submit"]');
-  if (button) button.disabled = busy;
-}
-function escapeText(value) {
-  return String(value ?? "");
-}
-function validUUID(value) {
-  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
-}
-function safeExtension(file) {
-  const types = {
-    "image/jpeg": "jpg",
-    "image/png": "png",
-    "image/webp": "webp"
-  };
-  return types[file.type] || null;
+:root {
+  --yl-blue: #123d70;
+  --yl-blue-dark: #082747;
+  --yl-gold: #f3a712;
+  --yl-light: #f4f7fb;
+  --yl-white: #ffffff;
+  --yl-text: #243247;
+  --yl-muted: #68778b;
+  --yl-border: #e1e8f0;
+  --yl-radius: 14px;
+  --yl-shadow: 0 8px 28px rgba(16, 43, 76, 0.09);
 }
 
-async function uploadPropertyPhotos(propertyId, files) {
-  const uploaded = [];
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 90px;
+}
 
-  for (const file of files) {
-    const extension = safeExtension(file);
-    if (!extension) throw new Error("Only JPG, PNG and WebP images are allowed.");
-    if (file.size > MAX_FILE_SIZE) {
-      throw new Error(file.name + " is larger than 5 MB.");
-    }
-    if (file.size === 0) throw new Error(file.name + " is empty.");
+body {
+  margin: 0;
+  color: var(--yl-text);
+  background: var(--yl-light);
+  font-family: Arial, Helvetica, sans-serif;
+  line-height: 1.6;
+}
 
-    const path = propertyId + "/" + crypto.randomUUID() + "." + extension;
-    const { error: uploadError } = await db.storage
-      .from(PHOTO_BUCKET)
-      .upload(path, file, {
-        contentType: file.type,
-        upsert: false
-      });
+* {
+  box-sizing: border-box;
+}
 
-    if (uploadError) throw uploadError;
+img {
+  max-width: 100%;
+}
 
-    const { error: recordError } = await db
-      .from("property_photos")
-      .insert([{
-        property_id: propertyId,
-        storage_path: path
-      }]);
+/* HEADER AND NAVIGATION */
 
-    if (recordError) {
-      // Best-effort cleanup if saving the photo record fails.
-      await db.storage.from(PHOTO_BUCKET).remove([path]);
-      throw recordError;
-    }
+header,
+nav {
+  position: relative;
+}
 
-    uploaded.push(path);
+header {
+  background: var(--yl-white);
+  box-shadow: 0 2px 14px rgba(8, 39, 71, 0.08);
+}
+
+nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 15px 4%;
+  background: var(--yl-white);
+}
+
+nav a {
+  color: var(--yl-blue);
+  font-weight: 700;
+  text-decoration: none;
+  padding: 9px 13px;
+  border-radius: 8px;
+  transition: background 0.2s, color 0.2s;
+}
+
+nav a:hover {
+  background: #eaf1fa;
+  color: var(--yl-blue-dark);
+}
+
+/* PAGE CONTENT */
+
+main,
+section {
+  scroll-margin-top: 24px;
+}
+
+section {
+  padding: 32px 5%;
+}
+
+h1,
+h2,
+h3 {
+  color: var(--yl-blue-dark);
+  line-height: 1.2;
+}
+
+h2 {
+  margin-bottom: 18px;
+}
+
+p {
+  color: var(--yl-muted);
+}
+
+/* HERO BACKGROUND */
+
+.hero,
+#hero,
+.hero-section {
+  position: relative;
+  overflow: hidden;
+  min-height: 390px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 55px 6%;
+  color: white;
+  background:
+    linear-gradient(
+      90deg,
+      rgba(5, 28, 52, 0.88) 0%,
+      rgba(5, 28, 52, 0.58) 55%,
+      rgba(5, 28, 52, 0.18) 100%
+    ),
+    url("https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=2000&q=85")
+    center 55% / cover no-repeat;
+  border-radius: 0 0 18px 18px;
+}
+
+.hero h1,
+#hero h1,
+.hero-section h1 {
+  max-width: 720px;
+  color: white;
+  font-size: clamp(32px, 5vw, 54px);
+  margin: 0 0 16px;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.hero p,
+#hero p,
+.hero-section p {
+  max-width: 650px;
+  color: white;
+  font-size: 18px;
+}
+
+/* SEARCH AND FORMS */
+
+form {
+  margin: 20px 0;
+  padding: 24px;
+  background: var(--yl-white);
+  border: 1px solid var(--yl-border);
+  border-radius: var(--yl-radius);
+  box-shadow: var(--yl-shadow);
+}
+
+label {
+  display: block;
+  margin: 12px 0 6px;
+  color: var(--yl-blue-dark);
+  font-weight: 700;
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  min-height: 46px;
+  padding: 12px 14px;
+  margin: 4px 0 12px;
+  color: var(--yl-text);
+  background: white;
+  border: 1px solid #ccd7e4;
+  border-radius: 9px;
+  font: inherit;
+}
+
+textarea {
+  min-height: 110px;
+  resize: vertical;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: 3px solid rgba(37, 116, 194, 0.16);
+  border-color: #2574c2;
+}
+
+/* BUTTONS */
+
+button,
+.btn,
+.button {
+  display: inline-block;
+  min-height: 44px;
+  padding: 12px 20px;
+  color: white;
+  background: var(--yl-blue);
+  border: 0;
+  border-radius: 9px;
+  font: inherit;
+  font-weight: 700;
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.2s, background 0.2s;
+}
+
+button:hover,
+.btn:hover,
+.button:hover {
+  background: var(--yl-blue-dark);
+  transform: translateY(-1px);
+}
+
+button[type="submit"] {
+  background: var(--yl-gold);
+  color: #17263a;
+}
+
+button[type="submit"]:hover {
+  background: #e49a06;
+}
+
+/* PROPERTY AND AGENCY CARDS */
+
+.property,
+.agency-card {
+  overflow: hidden;
+  margin: 16px 0;
+  padding: 20px;
+  background: var(--yl-white);
+  border: 1px solid var(--yl-border);
+  border-radius: var(--yl-radius);
+  box-shadow: var(--yl-shadow);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.property:hover,
+.agency-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 34px rgba(16, 43, 76, 0.14);
+}
+
+.property img,
+.agency-card img {
+  width: 100%;
+  max-height: 280px;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+.property h3,
+.agency-card h3 {
+  margin-top: 14px;
+}
+
+.property .price,
+.price {
+  color: #167447;
+  font-size: 22px;
+  font-weight: 800;
+}
+
+/* SECTION BACKGROUNDS */
+
+#findProperty,
+#propertyListings,
+#agencyDirectory {
+  background: var(--yl-light);
+}
+
+#listProperty,
+#registerAgency,
+#enquiries,
+#about {
+  background: var(--yl-white);
+  border-top: 1px solid var(--yl-border);
+}
+
+/* LINKS */
+
+a {
+  color: #1766a8;
+}
+
+a:hover {
+  color: var(--yl-gold);
+}
+
+/* FOOTER */
+
+footer {
+  padding: 28px 5%;
+  color: white;
+  background: var(--yl-blue-dark);
+  text-align: center;
+}
+
+footer p,
+footer a {
+  color: white;
+}
+
+/* MOBILE PHONE SUPPORT */
+
+@media (max-width: 700px) {
+  nav {
+    justify-content: flex-start;
+    gap: 5px;
+    padding: 12px;
   }
 
-  return uploaded;
-}
-
-// SEARCH PUBLISHED PROPERTIES
-document.getElementById("searchForm").addEventListener("submit", async function(event) {
-  event.preventDefault();
-  const form = this;
-  const results = document.getElementById("results");
-  results.replaceChildren();
-  showMessage("searchMessage", "Searching properties...");
-  setBusy(form, true);
-
-  try {
-    checkConnection();
-
-    let query = db.from("properties")
-      .select("id,title,description,province,city,suburb,property_type,listing_purpose,price,contact_phone")
-      .eq("status", "Published");
-
-    const province = document.getElementById("searchProvince").value;
-    const type = document.getElementById("searchType").value;
-    const purpose = document.getElementById("searchPurpose").value;
-
-    if (province) query = query.eq("province", province);
-    if (type) query = query.eq("property_type", type);
-    if (purpose) query = query.eq("listing_purpose", purpose);
-
-    const { data, error } = await query.limit(100);
-    if (error) throw error;
-
-    const area = document.getElementById("searchArea").value.trim().toLowerCase();
-    const matches = (data || []).filter(p => {
-      const location = [p.province, p.city, p.suburb]
-        .filter(Boolean).join(" ").toLowerCase();
-      return !area || location.includes(area);
-    });
-
-    if (!matches.length) {
-      showMessage("searchMessage", "No published properties match your search yet.");
-      return;
-    }
-
-    // Retrieve photo records for matching published properties.
-    const photoMap = new Map();
-    const ids = matches.map(p => p.id);
-    const { data: photos, error: photoError } = await db
-      .from("property_photos")
-      .select("property_id,storage_path")
-      .in("property_id", ids);
-
-    if (!photoError && photos) {
-      photos.forEach(photo => {
-        if (!photoMap.has(photo.property_id)) photoMap.set(photo.property_id, []);
-        photoMap.get(photo.property_id).push(photo.storage_path);
-      });
-    }
-
-    showMessage("searchMessage", matches.length + " published property result(s).");
-
-    matches.forEach(p => {
-      const card = document.createElement("article");
-      card.className = "property";
-
-      const title = document.createElement("h3");
-      title.textContent = p.title || "Property";
-
-      const price = document.createElement("p");
-      price.className = "price";
-      price.textContent = "R" + Number(p.price).toLocaleString("en-ZA");
-
-      const details = document.createElement("p");
-      details.textContent = [
-        p.property_type,
-        p.listing_purpose === "Sale" ? "For Sale" : "For Rent",
-        p.suburb, p.city, p.province
-      ].filter(Boolean).join(" | ");
-
-      const description = document.createElement("p");
-      description.textContent = p.description || "";
-
-      card.append(title, price, details);
-
-      const paths = photoMap.get(p.id) || [];
-      if (paths.length) {
-        const gallery = document.createElement("div");
-        gallery.className = "property-photos";
-
-        paths.forEach(path => {
-          const { data: publicData } = db.storage
-            .from(PHOTO_BUCKET).getPublicUrl(path);
-
-          const img = document.createElement("img");
-          img.src = publicData.publicUrl;
-          img.alt = "Photo of " + (p.title || "property");
-          img.loading = "lazy";
-          img.onerror = () => img.remove();
-          gallery.appendChild(img);
-        });
-
-        card.appendChild(gallery);
-      }
-
-      card.append(description);
-
-      if (p.contact_phone) {
-        const contact = document.createElement("p");
-        contact.textContent = "Contact: " + p.contact_phone;
-        card.appendChild(contact);
-      }
-
-      const enquire = document.createElement("button");
-      enquire.type = "button";
-      enquire.textContent = "Enquire About This Property";
-      enquire.addEventListener("click", () => {
-        document.getElementById("enquiryPropertyId").value = p.id;
-        showMessage("enquiryStatus", "Selected property: " + (p.title || p.id));
-        document.getElementById("enquiry").scrollIntoView({behavior:"smooth"});
-      });
-
-      card.appendChild(enquire);
-      results.appendChild(card);
-    });
-  } catch (error) {
-    console.error("Property search error:", error);
-    showMessage("searchMessage", "Could not load properties. Please check your connection and database permissions.");
-  } finally {
-    setBusy(form, false);
+  nav a {
+    padding: 8px 10px;
+    font-size: 14px;
   }
-});
 
-// SUBMIT PROPERTY AND UPLOAD PHOTOS
-document.getElementById("propertyForm").addEventListener("submit", async function(event) {
-  event.preventDefault();
-  const form = this;
-  setBusy(form, true);
-
-  let propertyId = null;
-
-  try {
-    checkConnection();
-
-    const files = Array.from(document.getElementById("listingPhotos").files || []);
-
-    if (files.length > MAX_PHOTOS) {
-      throw new Error("Please select no more than 5 photos.");
-    }
-
-    for (const file of files) {
-      if (!safeExtension(file)) {
-        throw new Error("Only JPG, PNG and WebP images are allowed.");
-      }
-      if (file.size > MAX_FILE_SIZE) {
-        throw new Error(file.name + " is larger than 5 MB.");
-      }
-      if (file.size === 0) {
-        throw new Error(file.name + " is empty.");
-      }
-    }
-
-    showMessage("listingMessage", "Submitting your property...");
-
-    const { data, error } = await db.rpc("submit_property", {
-      p_title: document.getElementById("listingTitle").value.trim(),
-      p_description: document.getElementById("listingDescription").value.trim() || null,
-      p_province: document.getElementById("listingProvince").value,
-      p_city: document.getElementById("listingCity").value.trim(),
-      p_suburb: document.getElementById("listingSuburb").value.trim() || null,
-      p_property_type: document.getElementById("listingType").value,
-      p_listing_purpose: document.getElementById("listingPurpose").value,
-      p_price: Number(document.getElementById("listingPrice").value),
-      p_contact_phone: document.getElementById("listingPhone").value.trim() || null
-    });
-
-    if (error) throw error;
-
-    propertyId = data;
-    if (!validUUID(propertyId)) {
-      throw new Error("The listing was submitted, but the server did not return a valid property ID. Please contact the site administrator.");
-    }
-
-    if (files.length) {
-      showMessage("listingMessage", "Property submitted. Uploading photos...");
-      await uploadPropertyPhotos(propertyId, files);
-    }
-
-    showMessage(
-      "listingMessage",
-      "Submitted successfully! Your property is awaiting review" +
-      (files.length ? " with " + files.length + " photo(s)." : ".")
-    );
-    form.reset();
-
-  } catch (error) {
-    console.error("Property submission error:", error);
-
-    if (propertyId) {
-      showMessage(
-        "listingMessage",
-        "Your property was submitted and is awaiting review, but photo upload was not completed: " +
-        (error.message || "Please try again later.")
-      );
-    } else {
-      showMessage(
-        "listingMessage",
-        "Submission failed: " + (error.message || "Please check database permissions.")
-      );
-    }
-  } finally {
-    setBusy(form, false);
+  section {
+    padding: 24px 16px;
   }
-});
 
-// REGISTER AGENCY
-document.getElementById("agencyForm").addEventListener("submit", async function(event) {
-  event.preventDefault();
-  const form = this;
-  setBusy(form, true);
-
-  try {
-    checkConnection();
-
-    const agency = {
-      agency_name: document.getElementById("agencyName").value.trim(),
-      contact_person: document.getElementById("agencyContact").value.trim(),
-      email: document.getElementById("agencyEmail").value.trim(),
-      phone: document.getElementById("agencyPhone").value.trim(),
-      province: document.getElementById("agencyProvince").value
-    };
-
-    const { error } = await db.from("agencies").insert([agency]);
-    if (error) throw error;
-
-    showMessage("agencyMessage", "Agency registration submitted successfully.");
-    form.reset();
-  } catch (error) {
-    console.error("Agency registration error:", error);
-    showMessage("agencyMessage", "Registration failed: " + (error.message || "Please check database permissions."));
-  } finally {
-    setBusy(form, false);
+  .hero,
+  #hero,
+  .hero-section {
+    min-height: 330px;
+    padding: 34px 20px;
+    background-position: 60% center;
   }
-});
 
-// SAVE BUYER ENQUIRY
-document.getElementById("enquiryForm").addEventListener("submit", async function(event) {
-  event.preventDefault();
-  const form = this;
-  setBusy(form, true);
-  showMessage("enquiryStatus", "Sending your enquiry...");
-
-  try {
-    checkConnection();
-
-    const propertyId = document.getElementById("enquiryPropertyId").value.trim();
-    if (!validUUID(propertyId)) {
-      throw new Error("Please select a property using its Enquire button.");
-    }
-
-    const enquiry = {
-      property_id: propertyId,
-      customer_name: document.getElementById("customerName").value.trim(),
-      customer_email: document.getElementById("customerEmail").value.trim() || null,
-      customer_phone: document.getElementById("customerPhone").value.trim() || null,
-      message: document.getElementById("enquiryMessage").value.trim()
-    };
-
-    if (!enquiry.customer_name || !enquiry.message) {
-      throw new Error("Please enter your name and message.");
-    }
-
-    const { error } = await db.from("enquiries").insert([enquiry]);
-    if (error) throw error;
-
-    showMessage("enquiryStatus", "Your enquiry was saved successfully. Thank you for contacting YL Properties.");
-    form.reset();
-  } catch (error) {
-    console.error("Enquiry submission error:", error);
-    showMessage("enquiryStatus", "Enquiry was NOT confirmed as saved. " + (error.message || "Please check the enquiries table and its INSERT policy."));
-  } finally {
-    setBusy(form, false);
+  .hero h1,
+  #hero h1,
+  .hero-section h1 {
+    font-size: 34px;
   }
-});
- 
-/* AGENCY DIRECTORY */
-let approvedAgencies = [];
 
-async function loadAgencies() {
-  const message = document.getElementById("agencyDirectoryMessage");
-  const results = document.getElementById("agencyDirectoryResults");
+  form {
+    padding: 17px;
+  }
 
-  if (!message || !results) return;
-
-  message.textContent = "Loading approved agencies...";
-
-  try {
-    const { data, error } = await db
-      .from("agencies")
-      .select("agency_name, contact_person, email, phone, province")
-      .eq("status", "Published")
-      .order("agency_name", { ascending: true });
-
-    if (error) throw error;
-
-    approvedAgencies = data || [];
-    showAgencies();
-  } catch (error) {
-    console.error(error);
-    message.textContent =
-      "Could not load agencies. Please check the database connection.";
+  button,
+  .btn,
+  .button {
+    max-width: 100%;
   }
 }
-
-function showAgencies() {
-  const results = document.getElementById("agencyDirectoryResults");
-  const message = document.getElementById("agencyDirectoryMessage");
-  const search = document.getElementById("agencySearchText");
-  const province = document.getElementById("agencySearchProvince");
-
-  if (!results || !message || !search || !province) return;
-
-  results.replaceChildren();
-
-  const term = search.value.trim().toLowerCase();
-
-  const matches = approvedAgencies.filter(a =>
-    (!term ||
-      (a.agency_name || "").toLowerCase().includes(term) ||
-      (a.province || "").toLowerCase().includes(term)) &&
-    (!province.value || a.province === province.value)
-  );
-
-  if (!matches.length) {
-    message.textContent = approvedAgencies.length
-      ? "No agencies match your search."
-      : "No approved agencies are listed yet.";
-    return;
-  }
-
-  message.textContent = matches.length + " approved agencies found.";
-
-  matches.forEach(a => {
-    const card = document.createElement("article");
-    card.className = "agency-card";
-
-    const title = document.createElement("h3");
-    title.textContent = a.agency_name || "Estate agency";
-    card.appendChild(title);
-
-    if (a.province) {
-      const p = document.createElement("p");
-      p.textContent = "Province: " + a.province;
-      card.appendChild(p);
-    }
-
-    if (a.contact_person) {
-      const p = document.createElement("p");
-      p.textContent = "Contact: " + a.contact_person;
-      card.appendChild(p);
-    }
-
-    if (a.phone) {
-      const p = document.createElement("p");
-      p.textContent = "Phone: " + a.phone;
-      card.appendChild(p);
-    }
-
-    if (a.email) {
-      const p = document.createElement("p");
-      p.textContent = "Email: " + a.email;
-      card.appendChild(p);
-    }
-
-    results.appendChild(card);
-  });
-}
-
-const agencySearchForm =
-  document.getElementById("agencySearchForm");
-
-if (agencySearchForm) {
-  agencySearchForm.addEventListener("submit", event => {
-    event.preventDefault();
-    showAgencies();
-  });
-}
-
-loadAgencies();
- 
-</script>
-</body>
-</html>
